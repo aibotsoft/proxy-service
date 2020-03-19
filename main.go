@@ -3,6 +3,7 @@ package main
 import (
 	"proxy-service/internal/config"
 	"proxy-service/internal/logging"
+	"time"
 )
 
 func main() {
@@ -10,6 +11,10 @@ func main() {
 	log := logging.New(cfg)
 	log.Println("Beginning...")
 	log.Printf("Config: %+v", cfg)
+	for {
+		log.Print(time.Now())
+		time.Sleep(time.Second * 5)
+	}
 	//db, err := storage.Open()
 	//if err != nil {
 	//	panic(err)

@@ -1,0 +1,84 @@
+#service_name: proxy-service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: proxy-service
+  name: proxy-service
+  namespace: micro
+spec:
+  selector:
+    app: proxy-service
+  ports:
+    - name: proxy-service
+      protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: proxy-service
+  namespace: micro
+  labels:
+    app: proxy-service
+data:
+  SERVICE_NAME: proxy-service
+  NATS_URL: nats://nats
+  CONTROLLER_PERIOD: 90s
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy-service
+  namespace: micro
+  labels:
+    app: proxy-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proxy-service
+  template:
+    metadata:
+      labels:
+        app: proxy-service
+    spec:
+      terminationGracePeriodSeconds: 5
+      containers:
+        - name: proxy-service
+          image: aibotsoft/proxy-service
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: micro-env
+            - configMapRef:
+                name: proxy-service
+          ports:
+            - name: proxy-service
+              containerPort: 80
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 50m
+              memory: 50Mi
+
+# Common config for micro namespace. Do not change
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: micro
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: micro-env
+  namespace: micro
+data:
+  SERVICE_ENV: prod
