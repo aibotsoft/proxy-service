@@ -1,0 +1,23 @@
+name: workflow
+on: [push]
+
+jobs:
+  build:
+    name: Build-Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: setup go
+        uses: actions/setup-go@v2-beta
+        with:
+          go-version: 1.14
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@master
+
+#      - name: Test
+#        run: make test
+
+      - name: Deploy
+        env:
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: make docker_deploy
