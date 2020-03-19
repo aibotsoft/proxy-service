@@ -14,7 +14,6 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 80
-
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -25,10 +24,6 @@ metadata:
     app: proxy-service
 data:
   SERVICE_NAME: proxy-service
-  NATS_URL: nats://nats
-  CONTROLLER_PERIOD: 90s
-
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -82,3 +77,4 @@ metadata:
   namespace: micro
 data:
   SERVICE_ENV: prod
+  NATS_URL: nats://nats
