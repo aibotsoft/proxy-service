@@ -5,6 +5,16 @@ import (
 	"time"
 )
 
+type ProxyItem struct {
+	Ip      string
+	Port    string
+	Code    string
+	Country string
+	//Anonymity string
+	//CreatedAt time.Time
+	//UpdatedAt time.Time
+}
+
 // Proxy from https://www.sslproxies.org/
 type Proxy struct {
 	ProxyId   int

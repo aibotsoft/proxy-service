@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func newProxyHandler(p *models.Proxy) {
+func newProxyHandler(p *models.ProxyItem) {
 	fmt.Printf("%+v", p)
 }
 
