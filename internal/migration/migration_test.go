@@ -7,7 +7,7 @@ import (
 )
 
 func TestUp(t *testing.T) {
-	db, err := storage.Open()
+	db, err := storage.NewStorage()
 	assert.Nil(t, err)
 	err = Up(db)
 	assert.Nil(t, err)
@@ -15,7 +15,7 @@ func TestUp(t *testing.T) {
 
 func TestUpTo(t *testing.T) {
 	targetVersion := 1
-	db, err := storage.Open()
+	db, err := storage.NewStorage()
 	assert.Nil(t, err)
 	err = UpTo(db, targetVersion)
 	assert.Nil(t, err)

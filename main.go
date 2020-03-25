@@ -1,45 +1,37 @@
 package main
 
 import (
-	"fmt"
-	"proxy-service/internal/broker"
 	"proxy-service/internal/config"
 	"proxy-service/internal/logging"
-	"proxy-service/internal/models"
-	"time"
+	"proxy-service/internal/msg_server"
 )
-
-func newProxyHandler(p *models.ProxyItem) {
-	fmt.Printf("%+v", p)
-}
 
 func main() {
 	cfg := config.NewConfig()
 	log := logging.New(cfg)
 	log.Println("Beginning...")
 	log.Printf("Config: %+v", cfg)
-	ec, err := broker.NewBroker(cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Print(ec)
-	log.Print(cfg.Controller.NewProxyAddress)
-	_, err = ec.Subscribe(cfg.Controller.NewProxyAddress, newProxyHandler)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	for {
-		log.Print(time.Now())
-		time.Sleep(time.Second * 10)
+	msg, err := msg_server.NewMsgServer(cfg, log)
+	if err != nil {
+		log.Fatal(err)
 	}
-	//db, err := storage.Open()
+	log.Fatal(msg.Run())
+
+	//log.Print(ec)
+	//log.Print(cfg.Controller.NewProxyAddress)
+	//_, err = ec.Subscribe(cfg.Controller.NewProxyAddress, newProxyHandler)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//db, err := storage.Connect(cfg)
 	//if err != nil {
 	//	panic(err)
 	//}
-	//err = db.Ping(context.Background())
-	//if err != nil {
-	//	panic(err)
+
+	//for {
+	//	log.Print(time.Now())
+	//	time.Sleep(time.Second * 10)
 	//}
 	//err = migration.Up(db)
 	//if err != nil {

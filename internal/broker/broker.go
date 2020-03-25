@@ -31,16 +31,3 @@ func NewBroker(cfg *config.Config) (*Broker, error) {
 	return &Broker{cfg: cfg, EncodedConn: ec}, nil
 
 }
-
-//func NewBroker(cfg *config.Config) (*nats.Conn, error) {
-//	natsConfig := cfg.Broker
-//
-//	opts := nats.Options{
-//		Url:            natsConfig.Url,
-//		AllowReconnect: natsConfig.AllowReconnect,
-//		MaxReconnect:   natsConfig.MaxReconnect,
-//		ReconnectWait:  natsConfig.ReconnectWait,
-//		Timeout:        natsConfig.Timeout,
-//	}
-//	return opts.Connect()
-//}

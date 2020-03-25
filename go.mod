@@ -3,6 +3,8 @@ module proxy-service
 go 1.13
 
 require (
+	github.com/davecgh/go-spew v1.1.1
+	github.com/dgraph-io/ristretto v0.0.2
 	github.com/gin-gonic/gin v1.5.0
 	github.com/jackc/pgx/v4 v4.4.1
 	github.com/jackc/tern v1.9.1
