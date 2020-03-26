@@ -1,23 +1,53 @@
 package main
 
 import (
-	"proxy-service/internal/config"
-	"proxy-service/internal/logging"
-	"proxy-service/internal/msg_server"
+	"fmt"
+	"github.com/aibotsoft/gproxy"
+	"github.com/aibotsoft/micro/config"
+	"github.com/aibotsoft/micro/logger"
+	"github.com/aibotsoft/micro/postgres"
+	"github.com/aibotsoft/proxy-service/cmd/collect"
+	"github.com/subosito/gotenv"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
-	cfg := config.NewConfig()
-	log := logging.New(cfg)
-	log.Println("Beginning...")
-	log.Printf("Config: %+v", cfg)
-
-	msg, err := msg_server.NewMsgServer(cfg, log)
+	// Init dependencies
+	gotenv.Must(gotenv.Load)
+	cfg := config.New()
+	log := logger.New().With("service", cfg.Service.Name)
+	log.Infow("Begin service", "config", cfg)
+	db, err := postgres.New(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Fatal(msg.Run())
+	// Инициализируем GracefulStop
+	errc := make(chan error)
+	go func() {
+		c := make(chan os.Signal)
+		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+		errc <- fmt.Errorf("%s", <-c)
+	}()
+	// Run gPRC proxy server
+	s := gproxy.NewServer(db)
+	go func() {
+		errc <- s.Serve()
+	}()
+	collectService := collect.New(cfg, log)
+	collectService.Start()
+	log.Info("exit: ", <-errc)
+	func() {
+		s.GracefulStop()
+		collectService.Stop()
+	}()
 
+	//msg, err := msg_server.NewMsgServer(cfg, log)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//log.Fatal(msg.Run())
 	//log.Print(ec)
 	//log.Print(cfg.Controller.NewProxyAddress)
 	//_, err = ec.Subscribe(cfg.Controller.NewProxyAddress, newProxyHandler)
