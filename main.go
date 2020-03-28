@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/aibotsoft/gproxy"
 	"github.com/aibotsoft/micro/config"
 	"github.com/aibotsoft/micro/logger"
 	"github.com/aibotsoft/micro/postgres"
 	"github.com/aibotsoft/proxy-service/cmd/collect"
+	"github.com/aibotsoft/proxy-service/internal/gproxy_client"
 	"github.com/subosito/gotenv"
 	"os"
 	"os/signal"
@@ -23,6 +25,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close(context.Background())
+
 	// Инициализируем GracefulStop
 	errc := make(chan error)
 	go func() {
@@ -35,38 +39,19 @@ func main() {
 	go func() {
 		errc <- s.Serve()
 	}()
-	collectService := collect.New(cfg, log)
+	proxyClient := gproxy_client.NewClient(cfg, log)
+
+	collectService := collect.New(cfg, log, proxyClient)
 	collectService.Start()
-	log.Info("exit: ", <-errc)
-	func() {
+	defer func() {
+		log.Debug("begin closing services")
 		s.GracefulStop()
 		collectService.Stop()
 	}()
 
+	log.Info("exit: ", <-errc)
 	//msg, err := msg_server.NewMsgServer(cfg, log)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//log.Fatal(msg.Run())
-	//log.Print(ec)
-	//log.Print(cfg.Controller.NewProxyAddress)
-	//_, err = ec.Subscribe(cfg.Controller.NewProxyAddress, newProxyHandler)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//db, err := storage.Connect(cfg)
-	//if err != nil {
-	//	panic(err)
-	//}
-
-	//for {
-	//	log.Print(time.Now())
-	//	time.Sleep(time.Second * 10)
-	//}
 	//err = migration.Up(db)
-	//if err != nil {
-	//	panic(err)
-	//}
 	//log.Println("main : Started : Initializing API support")
 	//server := http.Server{
 	//	Addr:         cfg.Web.APIHost,

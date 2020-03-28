@@ -2,10 +2,10 @@ package migration
 
 import (
 	"context"
+	"github.com/aibotsoft/micro/config"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/tern/migrate"
 	"path/filepath"
-	"proxy-service/internal/config"
 )
 
 const (

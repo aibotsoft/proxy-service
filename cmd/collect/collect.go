@@ -3,19 +3,15 @@ package collect
 import (
 	"context"
 	"github.com/aibotsoft/gproxy"
+	"github.com/aibotsoft/micro/cache"
 	"github.com/aibotsoft/micro/config"
 	"github.com/dgraph-io/ristretto"
 	"github.com/go-resty/resty/v2"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 	"net/http"
 	"strconv"
 	"time"
-)
-
-const (
-	gPort = ":50051"
 )
 
 type Collect struct {
@@ -67,29 +63,11 @@ func (c *Collect) sendProxyItem(p *gproxy.ProxyItem) {
 	ok = c.cache.Set(c.proxyItemKey(p), nil, 1)
 }
 
-func New(cfg *config.Config, log *zap.SugaredLogger) *Collect {
+func New(cfg *config.Config, log *zap.SugaredLogger, proxyClient gproxy.ProxyClient) *Collect {
 	c := cron.New()
 
 	tr := &http.Transport{TLSHandshakeTimeout: 0 * time.Second}
 	client := resty.New().SetTransport(tr).EnableTrace()
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	conn, err := grpc.DialContext(ctx, gPort, grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	proxyClient := gproxy.NewProxyClient(conn)
-
-	cache, err := ristretto.NewCache(&ristretto.Config{
-		NumCounters: 1e6,
-		MaxCost:     1e5,
-		BufferItems: 64,
-		Metrics:     true,
-	})
-	if err != nil {
-		log.Fatalf("did not get cache: %v", err)
-	}
 
 	return &Collect{
 		cfg:         cfg,
@@ -97,6 +75,6 @@ func New(cfg *config.Config, log *zap.SugaredLogger) *Collect {
 		log:         log,
 		client:      client,
 		proxyClient: proxyClient,
-		cache:       cache,
+		cache:       cache.NewCache(cfg),
 	}
 }
