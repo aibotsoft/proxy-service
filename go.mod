@@ -3,8 +3,8 @@ module github.com/aibotsoft/proxy-service
 go 1.14
 
 require (
-	github.com/aibotsoft/gproxy v0.0.0-20200326173522-f0ef8cb2c060
-	github.com/aibotsoft/micro v0.0.0-20200326160155-26ba47e0c454
+	github.com/aibotsoft/gproxy v0.0.0-20200329091514-0387fb58c3ee
+	github.com/aibotsoft/micro v0.0.0-20200328150951-9389c06c1d3a
 	github.com/antchfx/htmlquery v1.2.2
 	github.com/antchfx/xpath v1.1.4 // indirect
 	github.com/dgraph-io/ristretto v0.0.2
@@ -19,6 +19,10 @@ require (
 	github.com/stretchr/testify v1.5.1
 	github.com/subosito/gotenv v1.2.0
 	go.uber.org/zap v1.14.1
+	golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59 // indirect
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
+	golang.org/x/sys v0.0.0-20200327173247-9dae0f8f5775 // indirect
+	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
+	google.golang.org/genproto v0.0.0-20200326112834-f447254575fd // indirect
 	google.golang.org/grpc v1.28.0
 )

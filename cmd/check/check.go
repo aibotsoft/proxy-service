@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
+	"log"
 )
 
 type Check struct {
@@ -16,6 +17,18 @@ type Check struct {
 	proxyClient gproxy.ProxyClient
 }
 
+func (c *Check) CheckProxyJob() {
+	pi, err := c.getNextProxyItem()
+	if err != nil {
+		c.log.Error(err)
+		return
+	}
+	proxyStat := c.CheckProxy(pi)
+	err = c.SendProxyStat(proxyStat)
+	if err != nil {
+		c.log.Error(err)
+	}
+}
 func (c *Check) getNextProxyItem() (*gproxy.ProxyItem, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.cfg.ProxyService.GRPCTimeout)
 	defer cancel()
@@ -36,4 +49,9 @@ func (c *Check) Start() {
 }
 func (c *Check) Stop() {
 	c.cron.Stop()
+}
+
+func (c *Check) SendProxyStat(stat *gproxy.ProxyStat) error {
+	c.proxyClient.CreateProxyStat()
+	return nil
 }
