@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
-	"log"
 )
 
 type Check struct {
@@ -24,7 +23,7 @@ func (c *Check) CheckProxyJob() {
 		return
 	}
 	proxyStat := c.CheckProxy(pi)
-	err = c.SendProxyStat(proxyStat)
+	_, err = c.SendProxyStat(proxyStat)
 	if err != nil {
 		c.log.Error(err)
 	}
@@ -39,19 +38,24 @@ func (c *Check) getNextProxyItem() (*gproxy.ProxyItem, error) {
 	return res.GetProxyItem(), nil
 }
 
-func New(cfg *config.Config, log *zap.SugaredLogger, cron *cron.Cron, proxyClient gproxy.ProxyClient) *Check {
-	return &Check{cfg: cfg, cron: cron, log: log, proxyClient: proxyClient}
+func New(cfg *config.Config, log *zap.SugaredLogger, proxyClient gproxy.ProxyClient) *Check {
+	return &Check{cfg: cfg, cron: cron.New(), log: log, proxyClient: proxyClient}
 }
 
 func (c *Check) Start() {
-	//c.cron.Schedule(cron.Every(c.cfg.ProxyService.CollectPeriod), cron.FuncJob(c.CollectJob))
+	c.cron.Schedule(cron.Every(c.cfg.ProxyService.CheckPeriod), cron.FuncJob(c.CheckProxyJob))
 	c.cron.Start()
 }
 func (c *Check) Stop() {
 	c.cron.Stop()
 }
 
-func (c *Check) SendProxyStat(stat *gproxy.ProxyStat) error {
-	c.proxyClient.CreateProxyStat()
-	return nil
+func (c *Check) SendProxyStat(stat *gproxy.ProxyStat) (*gproxy.ProxyStat, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.cfg.ProxyService.GRPCTimeout)
+	defer cancel()
+	res, err := c.proxyClient.CreateProxyStat(ctx, &gproxy.CreateProxyStatRequest{ProxyStat: stat})
+	if err != nil {
+		return nil, errors.Wrap(err, "proxyClient.CreateProxyStat error")
+	}
+	return res.GetProxyStat(), nil
 }

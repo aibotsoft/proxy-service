@@ -3,8 +3,8 @@ module github.com/aibotsoft/proxy-service
 go 1.14
 
 require (
-	github.com/aibotsoft/gproxy v0.0.0-20200329091514-0387fb58c3ee
-	github.com/aibotsoft/micro v0.0.0-20200328150951-9389c06c1d3a
+	github.com/aibotsoft/gproxy v0.0.0-20200329095605-ce3f1769a97b
+	github.com/aibotsoft/micro v0.0.0-20200329101538-e3066ed48e12
 	github.com/antchfx/htmlquery v1.2.2
 	github.com/antchfx/xpath v1.1.4 // indirect
 	github.com/dgraph-io/ristretto v0.0.2

@@ -5,7 +5,6 @@ import (
 	"github.com/aibotsoft/micro/config"
 	"github.com/aibotsoft/proxy-service/internal/utils"
 	"github.com/antchfx/htmlquery"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/pkg/errors"
 	"golang.org/x/net/html"
 	"strconv"
@@ -65,10 +64,7 @@ func (c *Collect) scrapeProxy(proxyPageNode *html.Node) ([]gproxy.ProxyItem, err
 			ProxyCountry: &gproxy.ProxyCountry{
 				CountryName: htmlquery.InnerText(td[proxyCountryName]),
 				CountryCode: htmlquery.InnerText(td[proxyCountryCode]),
-				CreatedAt:   ptypes.TimestampNow(),
 			},
-			CreatedAt: ptypes.TimestampNow(),
-			UpdatedAt: ptypes.TimestampNow(),
 		}
 		proxyList = append(proxyList, item)
 	}
