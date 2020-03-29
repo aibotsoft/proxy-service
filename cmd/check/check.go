@@ -46,8 +46,9 @@ func (c *Check) Start() {
 	c.cron.Schedule(cron.Every(c.cfg.ProxyService.CheckPeriod), cron.FuncJob(c.CheckProxyJob))
 	c.cron.Start()
 }
-func (c *Check) Stop() {
-	c.cron.Stop()
+func (c *Check) Stop() context.Context {
+	ctx := c.cron.Stop()
+	return ctx
 }
 
 func (c *Check) SendProxyStat(stat *gproxy.ProxyStat) (*gproxy.ProxyStat, error) {

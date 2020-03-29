@@ -12,7 +12,7 @@ import (
 func Test_CheckAddr(t *testing.T) {
 	cfg := config.New()
 	log := logger.New()
-	c := New(cfg, log, nil, nil)
+	c := New(cfg, log, nil)
 	t.Run("Fail in localhost", func(t *testing.T) {
 		c.cfg.ProxyService.CheckTimeout = 10 * time.Millisecond
 		p := &gproxy.ProxyItem{
