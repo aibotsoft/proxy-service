@@ -23,6 +23,21 @@ type Collect struct {
 	cache       *ristretto.Cache
 }
 
+func New(cfg *config.Config, log *zap.SugaredLogger, proxyClient gproxy.ProxyClient) *Collect {
+	c := cron.New()
+
+	tr := &http.Transport{TLSHandshakeTimeout: 0 * time.Second}
+	client := resty.New().SetTransport(tr).EnableTrace()
+
+	return &Collect{
+		cfg:         cfg,
+		cron:        c,
+		log:         log,
+		client:      client,
+		proxyClient: proxyClient,
+		cache:       cache.NewCache(cfg),
+	}
+}
 func (c *Collect) Start() {
 	c.cron.Schedule(cron.Every(c.cfg.ProxyService.CollectPeriod), cron.FuncJob(c.CollectJob))
 	c.cron.Start()
@@ -30,7 +45,6 @@ func (c *Collect) Start() {
 func (c *Collect) Stop() {
 	c.cron.Stop()
 }
-
 func (c *Collect) CollectJob() {
 	proxyItems, err := c.collectProxy()
 	if err != nil {
@@ -45,6 +59,7 @@ func (c *Collect) CollectJob() {
 func (c *Collect) proxyItemKey(p *gproxy.ProxyItem) string {
 	return p.GetProxyIp() + ":" + strconv.Itoa(int(p.GetProxyPort()))
 }
+
 func (c *Collect) sendProxyItem(p *gproxy.ProxyItem) {
 	_, ok := c.cache.Get(c.proxyItemKey(p))
 	if ok {
@@ -61,20 +76,4 @@ func (c *Collect) sendProxyItem(p *gproxy.ProxyItem) {
 	}
 	c.log.Debug(res.GetProxyItem().GetProxyId())
 	ok = c.cache.Set(c.proxyItemKey(p), nil, 1)
-}
-
-func New(cfg *config.Config, log *zap.SugaredLogger, proxyClient gproxy.ProxyClient) *Collect {
-	c := cron.New()
-
-	tr := &http.Transport{TLSHandshakeTimeout: 0 * time.Second}
-	client := resty.New().SetTransport(tr).EnableTrace()
-
-	return &Collect{
-		cfg:         cfg,
-		cron:        c,
-		log:         log,
-		client:      client,
-		proxyClient: proxyClient,
-		cache:       cache.NewCache(cfg),
-	}
 }

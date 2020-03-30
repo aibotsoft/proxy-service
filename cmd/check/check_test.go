@@ -26,7 +26,7 @@ func Test_CheckAddr(t *testing.T) {
 			ProxyIp:   "0.0.0.0",
 			ProxyPort: 80,
 		}
-		got := c.CheckProxy(p)
+		got := c.checkProxy(p)
 		assert.False(t, got.ConnStatus)
 	})
 	t.Run("Suc in 1.1.1.1", func(t *testing.T) {
@@ -35,7 +35,7 @@ func Test_CheckAddr(t *testing.T) {
 			ProxyIp:   "1.1.1.1",
 			ProxyPort: 80,
 		}
-		got := c.CheckProxy(p)
+		got := c.checkProxy(p)
 		assert.True(t, got.ConnStatus)
 	})
 }

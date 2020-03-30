@@ -32,7 +32,7 @@ func main() {
 		errc <- fmt.Errorf("%s", <-c)
 	}()
 	// Run gPRC proxy server
-	s := gproxy.NewServer(db)
+	s := gproxy.NewServer(cfg, log, db)
 	go func() {
 		errc <- s.Serve()
 	}()
