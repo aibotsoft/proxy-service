@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/aibotsoft/gproxy"
 	"github.com/aibotsoft/micro/config"
@@ -22,11 +21,8 @@ func main() {
 	cfg := config.New()
 	log := logger.New().With("service", cfg.Service.Name)
 	log.Infow("Begin service", "config", cfg)
-	db, err := postgres.New(cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close(context.Background())
+	db := postgres.MustConnect(cfg)
+	defer db.Close()
 
 	// Инициализируем GracefulStop
 	errc := make(chan error)
