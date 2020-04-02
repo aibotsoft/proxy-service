@@ -1,0 +1,1 @@
+drop view if exists next_proxy_view;
