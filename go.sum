@@ -7,6 +7,8 @@ github.com/aibotsoft/gen/proxypb v0.0.0-20200331105045-166b147b6c6f h1:yFnsYzBVR
 github.com/aibotsoft/gen/proxypb v0.0.0-20200331105045-166b147b6c6f/go.mod h1:8AMZO09AVlGkzVzaLvFTZ1fqr6EBatWaCzT4zCvJx5k=
 github.com/aibotsoft/gen/proxypb v0.0.0-20200402130648-483889898947 h1:6L1l2XN6wcmSvBTiqGDoooSvCLw8srW+GkkA6hheew4=
 github.com/aibotsoft/gen/proxypb v0.0.0-20200402130648-483889898947/go.mod h1:8AMZO09AVlGkzVzaLvFTZ1fqr6EBatWaCzT4zCvJx5k=
+github.com/aibotsoft/gen/proxypb v0.0.0-20200402212001-b19939941e7a h1:LWj88qVCJ4BQ5vUe2pxwVUPU4gO0t8fWa7q99utTdtE=
+github.com/aibotsoft/gen/proxypb v0.0.0-20200402212001-b19939941e7a/go.mod h1:8AMZO09AVlGkzVzaLvFTZ1fqr6EBatWaCzT4zCvJx5k=
 github.com/aibotsoft/gproxy v0.0.0-20200330154955-28733199c649 h1:ogC62f39MC5QHThlh/VwT234Cyf7VoKhqPLG0oFaR8k=
 github.com/aibotsoft/gproxy v0.0.0-20200330154955-28733199c649/go.mod h1:xnG5xqC/6Elwq8wjZ1lSc/MD7gxgZlSAAvmKzN3Iem0=
 github.com/aibotsoft/micro v0.0.0-20200329165958-a3dfed966912 h1:jqpmCbVHxXDBvNCGHBaAwUYj/96PeF7OzxesF05KAHQ=

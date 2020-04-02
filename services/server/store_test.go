@@ -92,3 +92,11 @@ func TestStore_GetBestProxy(t *testing.T) {
 		assert.NotEmpty(t, get, get)
 	}
 }
+
+func TestStore_DeleteBadProxy(t *testing.T) {
+	store := initStore(t)
+	get, err := store.DeleteBadProxy(context.Background())
+	if assert.NoError(t, err, err) {
+		assert.NotEmpty(t, get, get)
+	}
+}

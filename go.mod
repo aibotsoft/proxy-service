@@ -3,7 +3,7 @@ module github.com/aibotsoft/proxy-service
 go 1.14
 
 require (
-	github.com/aibotsoft/gen/proxypb v0.0.0-20200402130648-483889898947
+	github.com/aibotsoft/gen/proxypb v0.0.0-20200402212001-b19939941e7a
 	github.com/aibotsoft/gproxy v0.0.0-20200330154955-28733199c649
 	github.com/aibotsoft/micro v0.0.0-20200402091437-694735b9317e
 	github.com/antchfx/htmlquery v1.2.2

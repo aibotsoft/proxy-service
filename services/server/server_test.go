@@ -2,6 +2,7 @@ package server_test
 
 import (
 	"context"
+	pb "github.com/aibotsoft/gen/proxypb"
 	"github.com/aibotsoft/micro/config"
 	"github.com/aibotsoft/micro/logger"
 	"github.com/aibotsoft/micro/sqlserver"
@@ -55,5 +56,13 @@ func TestServer_GetBestProxy(t *testing.T) {
 	got, err := s.GetBestProxy(context.Background(), nil)
 	if assert.NoError(t, err, err) {
 		assert.IsType(t, int64(0), got.GetProxyItem().GetProxyId())
+	}
+}
+
+func TestServer_DeleteBadProxy(t *testing.T) {
+	s := initServer(t)
+	got, err := s.DeleteBadProxy(context.Background(), nil)
+	if assert.NoError(t, err, err) {
+		assert.IsType(t, make([]*pb.BadProxy, 0), got.GetBadProxy())
 	}
 }

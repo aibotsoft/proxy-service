@@ -148,6 +148,28 @@ func (s *Store) GetBestProxy(ctx context.Context) (*pb.ProxyItem, error) {
 	return p, nil
 }
 
+func (s *Store) DeleteBadProxy(ctx context.Context) ([]*pb.BadProxy, error) {
+	var badProxyList []*pb.BadProxy
+
+	rows, err := s.db.QueryContext(ctx, "uspDeleteBadProxy",
+		sql.Named("minSuccessRate", 0.1),
+		sql.Named("minCheckCount", 20),
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "uspDeleteBadProxy error")
+	}
+	for rows.Next() {
+		p := &pb.BadProxy{}
+		err := rows.Scan(&p.ProxyId, &p.DeletedAt)
+		if err != nil {
+			s.log.Info("uspDeleteBadProxy Scan error ", err)
+			continue
+		}
+		badProxyList = append(badProxyList, p)
+	}
+	return badProxyList, nil
+}
+
 //func (s *Store) GetNextProxyItem(p *ProxyItem) error {
 //	var ip net.IP
 //	err := s.db.QueryRow(context.Background(), getNextProxyItem).Scan(&p.ProxyId, &ip, &p.ProxyPort)

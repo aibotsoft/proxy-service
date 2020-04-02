@@ -86,3 +86,14 @@ func (s *Server) GetBestProxy(ctx context.Context, req *pb.GetBestProxyRequest) 
 	}
 	return &pb.GetBestProxyResponse{ProxyItem: proxyItem}, nil
 }
+func (s *Server) DeleteBadProxy(ctx context.Context, req *pb.DeleteBadProxyRequest) (*pb.DeleteBadProxyResponse, error) {
+	deletedList, err := s.store.DeleteBadProxy(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "store.DeleteBadProxy error: %v", err)
+	}
+	return &pb.DeleteBadProxyResponse{BadProxy: deletedList}, nil
+}
+
+func (s *Server) DeleteOldStat(ctx context.Context, req *pb.DeleteOldStatRequest) (*pb.DeleteOldStatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteOldStat not implemented")
+}
