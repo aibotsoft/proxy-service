@@ -5,6 +5,8 @@ github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/aibotsoft/gen/proxypb v0.0.0-20200331105045-166b147b6c6f h1:yFnsYzBVRD04PW+HZaUyeOajRi0qOKdJwGNbW3Tp9wc=
 github.com/aibotsoft/gen/proxypb v0.0.0-20200331105045-166b147b6c6f/go.mod h1:8AMZO09AVlGkzVzaLvFTZ1fqr6EBatWaCzT4zCvJx5k=
+github.com/aibotsoft/gen/proxypb v0.0.0-20200402130648-483889898947 h1:6L1l2XN6wcmSvBTiqGDoooSvCLw8srW+GkkA6hheew4=
+github.com/aibotsoft/gen/proxypb v0.0.0-20200402130648-483889898947/go.mod h1:8AMZO09AVlGkzVzaLvFTZ1fqr6EBatWaCzT4zCvJx5k=
 github.com/aibotsoft/gproxy v0.0.0-20200330154955-28733199c649 h1:ogC62f39MC5QHThlh/VwT234Cyf7VoKhqPLG0oFaR8k=
 github.com/aibotsoft/gproxy v0.0.0-20200330154955-28733199c649/go.mod h1:xnG5xqC/6Elwq8wjZ1lSc/MD7gxgZlSAAvmKzN3Iem0=
 github.com/aibotsoft/micro v0.0.0-20200329165958-a3dfed966912 h1:jqpmCbVHxXDBvNCGHBaAwUYj/96PeF7OzxesF05KAHQ=
@@ -265,6 +267,8 @@ google.golang.org/genproto v0.0.0-20200330113809-af700f360a68 h1:ay2fio+sR6N1ccq
 google.golang.org/genproto v0.0.0-20200330113809-af700f360a68/go.mod h1:55QSHmfGQM9UVYDPBsyGGes0y52j32PQ3BqQfXhyH3c=
 google.golang.org/genproto v0.0.0-20200401122417-09ab7b7031d2 h1:eZsz/292hR170DD4kerBdhgSY46xtPMKK7cni40jBmk=
 google.golang.org/genproto v0.0.0-20200401122417-09ab7b7031d2/go.mod h1:55QSHmfGQM9UVYDPBsyGGes0y52j32PQ3BqQfXhyH3c=
+google.golang.org/genproto v0.0.0-20200402124713-8ff61da6d932 h1:aw1IXx+GKsPxp8MaZuDaKwNdOno9liI4TElk87LJFAo=
+google.golang.org/genproto v0.0.0-20200402124713-8ff61da6d932/go.mod h1:55QSHmfGQM9UVYDPBsyGGes0y52j32PQ3BqQfXhyH3c=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.23.0/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=
 google.golang.org/grpc v1.25.1/go.mod h1:c3i+UQWmh7LiEpx4sFZnkU36qjEYZ0imhYfXVyQciAY=

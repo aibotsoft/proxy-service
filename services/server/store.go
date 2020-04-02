@@ -23,8 +23,7 @@ const (
 )
 
 var ErrNoRows = errors.New("no rows in result set")
-
-//var ErrQueryTooOften = errors.New("query too often, need to wait")
+var ErrQueryTooOften = errors.New("query too often, need to wait")
 
 type Store struct {
 	cfg                *config.Config
@@ -59,96 +58,81 @@ func (s *Store) GetOrCreateProxyCountry(ctx context.Context, c *pb.ProxyCountry)
 }
 
 func (s *Store) GetOrCreateProxyItem(ctx context.Context, p *pb.ProxyItem) error {
+	if get, b := s.cache.Get(p.ProxyAddr); b {
+		if value, ok := get.(int64); ok {
+			p.ProxyId = value
+			return nil
+		}
+	}
 	err := s.GetOrCreateProxyCountry(ctx, p.ProxyCountry)
 	if err != nil {
 		return errors.Wrap(err, "GetOrCreateProxyCountry error")
 	}
 	err = s.db.QueryRowContext(ctx, "uspGetOrCreateProxy",
-		sql.Named("proxy_ip", &p.ProxyIp),
-		sql.Named("proxy_port", &p.ProxyPort),
+		sql.Named("proxy_addr", &p.ProxyAddr),
 		sql.Named("country_id", &p.ProxyCountry.CountryId),
 	).Scan(&p.ProxyId)
 	if err != nil {
 		return errors.Wrap(err, "uspGetOrCreateProxy error")
 	}
-	s.cache.Set(p.P, p.ProxyId, 1)
-
+	s.cache.Set(p.ProxyAddr, p.ProxyId, 1)
 	return nil
 }
 
-//func (s *Store) SelectProxyCountryIdByCode(c *pb.ProxyCountry) error {
-//	return s.db.QueryRowContext(context.Background(), selectProxyCountryIdByCode, c.CountryCode).Scan(&c.CountryId)
-//}
+func (s *Store) CreateProxyStat(ctx context.Context, stat *pb.ProxyStat) error {
+	return s.db.QueryRowContext(ctx, "uspInsertProxyStat", stat.ProxyId, stat.ConnTime, stat.ConnStatus).Scan(&stat.CreatedAt)
+}
 
-//func (s *Store) InsertProxyCountry(c *pb.ProxyCountry) error {
-//	err := s.db.QueryRowContext(context.Background(), insertProxyCountry, c.CountryName, c.CountryCode).Scan(&c.CountryId)
-//	if err != nil {
-//		return errors.Wrapf(err, "error insert proxy country %+v", c)
-//	}
-//	return nil
-//}
+func (s *Store) GetNextProxyItem(ctx context.Context) (*pb.ProxyItem, error) {
+	proxyItem, err := s.NextProxyItemProducer(ctx)
+	switch err {
+	case nil:
+		return &proxyItem, nil
+	//case pgx.ErrNoRows:
+	//	return nil, ErrNoRows
+	default:
+		return nil, errors.Wrap(err, "Store: GetNextProxyItem error")
+	}
+}
 
-//func (s *Store) GetNextProxyItemBatch(ctx context.Context, size int) error {
-//	lastQueryTimeout := time.Now().UTC().Sub(s.nextProxyLastQuery) > nextProxyQueryTimeout
-//	if !lastQueryTimeout {
-//		s.log.Info("QueryTooOften")
-//		return ErrQueryTooOften
-//	}
-//	s.nextProxyLastQuery = time.Now().UTC()
-//	rows, err := s.db.QueryContext(ctx, getNextProxyItemBatch, size)
-//	if err != nil {
-//		return err
-//	}
-//	defer rows.Close()
-//	for rows.Next() {
-//		var ip net.IP
-//		p := pb.ProxyItem{}
-//		err := rows.Scan(&p.ProxyId, &ip, &p.ProxyPort)
-//		if err != nil {
-//			s.log.Error(errors.Wrap(err, "error wile scan getNextProxyItemBatch"))
-//			continue
-//		}
-//		p.ProxyIp = ip.String()
-//		s.nextProxyQueue <- p
-//	}
-//	return nil
-//}
+////NextProxyItemProducer вынимает ProxyItem из nextProxyQueue
+////Если элемента нет, вызывает функцию пополнения, и повторяет попытку взять элемент
+func (s *Store) NextProxyItemProducer(ctx context.Context) (pb.ProxyItem, error) {
+	for {
+		select {
+		case p := <-s.nextProxyQueue:
+			return p, nil
+		default:
+			_ = s.GetNextProxyItemBatch(ctx, 100)
+			return pb.ProxyItem{}, ErrNoRows
+		}
+	}
+}
 
-//func (s *Store) GetNextProxyItem(ctx context.Context) (*pb.ProxyItem, error) {
-//	proxyItem, err := s.NextProxyItemProducer(ctx)
-//	switch err {
-//	case nil:
-//		return &proxyItem, nil
-//	case pgx.ErrNoRows:
-//		return nil, ErrNoRows
-//	default:
-//		return nil, errors.Wrap(err, "Store: GetNextProxyItem error")
-//	}
-//}
+func (s *Store) GetNextProxyItemBatch(ctx context.Context, size int) error {
+	lastQueryTimeout := time.Now().UTC().Sub(s.nextProxyLastQuery) > nextProxyQueryTimeout
+	if !lastQueryTimeout {
+		s.log.Info("QueryTooOften")
+		return ErrQueryTooOften
+	}
+	s.nextProxyLastQuery = time.Now().UTC()
 
-// NextProxyItemProducer вынимает ProxyItem из nextProxyQueue
-// Если элемента нет, вызывает функцию пополнения, и повторяет попытку взять элемент
-//func (s *Store) NextProxyItemProducer(ctx context.Context) (pb.ProxyItem, error) {
-//	for {
-//		select {
-//		case p := <-s.nextProxyQueue:
-//			return p, nil
-//		default:
-//			err := s.GetNextProxyItemBatch(ctx, 100)
-//			switch err {
-//			case nil:
-//			case ErrQueryTooOften:
-//				time.Sleep(100 * time.Millisecond)
-//			default:
-//				return pb.ProxyItem{}, err
-//			}
-//		}
-//	}
-//}
-
-//func (s *Store) CreateProxyStat(ctx context.Context, stat *pb.ProxyStat) error {
-//	return s.db.QueryRowContext(ctx, insertProxyStat, stat.ProxyId, stat.ConnTime, stat.ConnStatus).Scan(&stat.CreatedAt)
-//}
+	rows, err := s.db.QueryContext(ctx, "uspGetNextProxy", sql.Named("returnCount", size))
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		p := pb.ProxyItem{}
+		err := rows.Scan(&p.ProxyId, &p.ProxyAddr, &p.UpdatedAt)
+		if err != nil {
+			s.log.Error(errors.Wrap(err, "error wile scan getNextProxyItemBatch"))
+			continue
+		}
+		s.nextProxyQueue <- p
+	}
+	return nil
+}
 
 //func (s *Store) GetNextProxyItem(p *ProxyItem) error {
 //	var ip net.IP
@@ -171,4 +155,14 @@ func (s *Store) GetOrCreateProxyItem(ctx context.Context, p *pb.ProxyItem) error
 //}
 //func (s *Store) SelectProxyIdByUI(ctx context.Context, p *pb.ProxyItem) error {
 //	return s.db.QueryRowContext(ctx, selectProxyIdByUI, p.ProxyIp, p.ProxyPort).Scan(&p.ProxyId)
+//}
+//func (s *Store) SelectProxyCountryIdByCode(c *pb.ProxyCountry) error {
+//	return s.db.QueryRowContext(context.Background(), selectProxyCountryIdByCode, c.CountryCode).Scan(&c.CountryId)
+//}
+//func (s *Store) InsertProxyCountry(c *pb.ProxyCountry) error {
+//	err := s.db.QueryRowContext(context.Background(), insertProxyCountry, c.CountryName, c.CountryCode).Scan(&c.CountryId)
+//	if err != nil {
+//		return errors.Wrapf(err, "error insert proxy country %+v", c)
+//	}
+//	return nil
 //}

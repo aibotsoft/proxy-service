@@ -3,7 +3,7 @@ module github.com/aibotsoft/proxy-service
 go 1.14
 
 require (
-	github.com/aibotsoft/gen/proxypb v0.0.0-20200331105045-166b147b6c6f
+	github.com/aibotsoft/gen/proxypb v0.0.0-20200402130648-483889898947
 	github.com/aibotsoft/gproxy v0.0.0-20200330154955-28733199c649
 	github.com/aibotsoft/micro v0.0.0-20200402091437-694735b9317e
 	github.com/antchfx/htmlquery v1.2.2
@@ -20,7 +20,7 @@ require (
 	go.uber.org/zap v1.14.1
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
 	golang.org/x/sys v0.0.0-20200331124033-c3d80250170d // indirect
-	google.golang.org/genproto v0.0.0-20200401122417-09ab7b7031d2 // indirect
+	google.golang.org/genproto v0.0.0-20200402124713-8ff61da6d932 // indirect
 	google.golang.org/grpc v1.28.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

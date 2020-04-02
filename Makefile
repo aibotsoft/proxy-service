@@ -50,3 +50,6 @@ mig_up:
 
 import_env:
 	source .env
+
+mig_create:
+	migrate create -ext sql -dir migrations file_name

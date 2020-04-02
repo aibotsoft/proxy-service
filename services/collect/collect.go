@@ -15,7 +15,6 @@ import (
 	"golang.org/x/net/html"
 	"net"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -74,24 +73,20 @@ func (c *Collect) CollectJob() {
 	c.log.Debugf("Got %v proxy, bun only %v new", len(proxyItems), newProxyCount)
 }
 
-func (c *Collect) proxyItemKey(p *pb.ProxyItem) string {
-	return net.JoinHostPort(p.GetProxyIp(), strconv.Itoa(int(p.GetProxyPort())))
-}
-
 func (c *Collect) sendProxyItem(p *pb.ProxyItem) int {
-	_, ok := c.cache.Get(c.proxyItemKey(p))
+	_, ok := c.cache.Get(p.ProxyAddr)
 	if ok {
 		return 0
 	}
 	req := &pb.CreateProxyRequest{ProxyItem: p}
-	ctx, cancel := context.WithTimeout(context.Background(), c.cfg.ProxyService.GRPCTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.cfg.ProxyService.GrpcTimeout)
 	defer cancel()
 	res, err := c.proxyClient.CreateProxy(ctx, req)
 	if err != nil {
 		c.log.Error("proxyClient.CreateProxy error: ", err)
 		return 0
 	}
-	ok = c.cache.Set(c.proxyItemKey(p), res.GetProxyItem().GetProxyId(), 1)
+	ok = c.cache.Set(p.ProxyAddr, res.GetProxyItem().GetProxyId(), 1)
 	return 1
 }
 
@@ -129,14 +124,8 @@ func (c *Collect) scrapeProxy(proxyPageNode *html.Node) ([]pb.ProxyItem, error) 
 			c.log.Error("Error QueryAll: ", err)
 			continue
 		}
-		port, err := strconv.Atoi(htmlquery.InnerText(td[proxyPort]))
-		if err != nil {
-			c.log.Error("proxyPort to int convert error: ", err)
-			continue
-		}
 		item := pb.ProxyItem{
-			ProxyIp:   htmlquery.InnerText(td[proxyIP]),
-			ProxyPort: int64(port),
+			ProxyAddr: net.JoinHostPort(htmlquery.InnerText(td[proxyIP]), htmlquery.InnerText(td[proxyPort])),
 			ProxyCountry: &pb.ProxyCountry{
 				CountryName: htmlquery.InnerText(td[proxyCountryName]),
 				CountryCode: htmlquery.InnerText(td[proxyCountryCode]),

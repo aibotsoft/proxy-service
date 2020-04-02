@@ -10,7 +10,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"net"
-	"strconv"
 	"time"
 )
 
@@ -67,8 +66,7 @@ func (c *Check) getNextProxyItem(ctx context.Context) (*pb.ProxyItem, error) {
 	return res.GetProxyItem(), nil
 }
 func (c *Check) checkProxy(ctx context.Context, p *pb.ProxyItem) *pb.ProxyStat {
-	addr := net.JoinHostPort(p.ProxyIp, strconv.Itoa(int(p.ProxyPort)))
-	ConnTime, ConnStatus := c.checkAddr(ctx, addr)
+	ConnTime, ConnStatus := c.checkAddr(ctx, p.ProxyAddr)
 	stat := &pb.ProxyStat{
 		ProxyId:    p.ProxyId,
 		ConnTime:   ConnTime.Milliseconds(),

@@ -10,10 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/subosito/gotenv"
 	"testing"
-	"time"
 )
 
-func TestStore(t *testing.T) {
+func initStore(t *testing.T) *server.Store {
+	t.Helper()
 	gotenv.Must(gotenv.Load, "./../../.env")
 	log := logger.New()
 	cfg := config.New()
@@ -21,29 +21,25 @@ func TestStore(t *testing.T) {
 	assert.NotEmpty(t, db, db)
 	store := server.NewStore(cfg, log, db)
 	assert.NotEmpty(t, store, store)
+	return store
+}
+func TestStore(t *testing.T) {
 	ctx := context.Background()
-	//log.Info(store)
+	store := initStore(t)
 
 	t.Run("GetOrCreateProxyCountry", func(t *testing.T) {
 		p := &pb.ProxyCountry{
 			CountryName: "Unknown",
-			CountryCode: "NA",
+			CountryCode: "22",
 		}
 		err := store.GetOrCreateProxyCountry(ctx, p)
-		if assert.NoError(t, err) {
-			assert.Equal(t, int64(1), p.CountryId)
-		}
-		time.Sleep(time.Millisecond * 10)
-		// repeat query for get from cache
-		err = store.GetOrCreateProxyCountry(ctx, p)
-		if assert.NoError(t, err) {
-			assert.Equal(t, int64(1), p.CountryId)
+		if assert.NoError(t, err, err) {
+			assert.Equal(t, int64(1), p.CountryId, p)
 		}
 	})
 	t.Run("GetOrCreateProxyItem", func(t *testing.T) {
 		p := &pb.ProxyItem{
-			ProxyIp:   "0.0.0.0",
-			ProxyPort: 80,
+			ProxyAddr: "0.0.0.0:80",
 			ProxyCountry: &pb.ProxyCountry{
 				CountryName: "Unknown",
 				CountryCode: "NA",
@@ -53,6 +49,38 @@ func TestStore(t *testing.T) {
 		if assert.NoError(t, err) {
 			assert.Equal(t, int64(1), p.ProxyId)
 		}
+		// repeat query for get from cache
+		err = store.GetOrCreateProxyItem(ctx, p)
+		if assert.NoError(t, err) {
+			assert.Equal(t, int64(1), p.ProxyId)
+		}
 	})
+}
 
+func TestStore_CreateProxyStat(t *testing.T) {
+	store := initStore(t)
+	stat := &pb.ProxyStat{
+		ProxyId:    1,
+		ConnTime:   1,
+		ConnStatus: true,
+	}
+	err := store.CreateProxyStat(context.Background(), stat)
+	if assert.NoError(t, err) {
+		assert.NotEmpty(t, stat.CreatedAt, stat.CreatedAt)
+	}
+}
+
+func TestStore_GetNextProxyItemBatch(t *testing.T) {
+	store := initStore(t)
+	ctx := context.Background()
+	err := store.GetNextProxyItemBatch(ctx, 100)
+	assert.NoError(t, err)
+}
+
+func TestStore_GetNextProxyItem(t *testing.T) {
+	store := initStore(t)
+	get, err := store.GetNextProxyItem(context.Background())
+	if assert.NoError(t, err) {
+		assert.NotEmpty(t, get, get)
+	}
 }

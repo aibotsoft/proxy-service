@@ -1,5 +1,6 @@
 create or alter proc uspGetBestProxy @returnCount int = null, @minSuccessRate int = null, @minCheckCount int = null as
 begin
+    set nocount on;
     with top_stat as (
         select top 50 proxy_id, avg(conn_time) avgTime, avg(conn_status * 1.0) successRate, count(proxy_id) checkCount
         from stat

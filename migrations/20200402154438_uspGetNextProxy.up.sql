@@ -1,5 +1,6 @@
 create or alter proc uspGetNextProxy @returnCount int = null, @minCheckInterval int = null as
 begin
+    set nocount on
     select top (isnull(@returnCount, 100)) proxy.proxy_id,
                                            proxy_addr,
                                            max(s.created_at) last
