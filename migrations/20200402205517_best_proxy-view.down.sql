@@ -1,0 +1,1 @@
+drop view if exists best_proxy_view
