@@ -6,16 +6,16 @@ begin
         output inserted.country_id
         values (@country_name, @country_code)
 end
--- go
--- create or alter proc uspGetOrCreateProxy @proxy_addr varchar(30), @country_id smallint as
--- begin
---     select proxy_id from proxy where proxy_addr = @proxy_addr
---     if @@rowcount = 0
---         insert into proxy (proxy_addr, country_id)
---         output inserted.proxy_id
---         values (@proxy_addr, @country_id)
--- end
---
+go
+create or alter proc uspGetOrCreateProxy @proxy_addr varchar(30), @country_id smallint as
+begin
+    select proxy_id from proxy where proxy_addr = @proxy_addr
+    if @@rowcount = 0
+        insert into proxy (proxy_addr, country_id)
+        output inserted.proxy_id
+        values (@proxy_addr, @country_id)
+end
+
 -- create or alter proc uspGetNextProxy @returnCount int = null, @minCheckInterval int = null as
 -- begin
 --     select top (isnull(@returnCount, 100)) proxy.proxy_id,
