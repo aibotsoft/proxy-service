@@ -19,7 +19,7 @@ type Server struct {
 	log   *zap.SugaredLogger
 	store *Store
 	gs    *grpc.Server
-	pb.UnimplementedProxyServer
+	//pb.UnimplementedProxyServer
 }
 
 func NewServer(cfg *config.Config, log *zap.SugaredLogger, db *sql.DB) *Server {

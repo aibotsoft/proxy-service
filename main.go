@@ -7,6 +7,7 @@ import (
 	"github.com/aibotsoft/micro/config"
 	"github.com/aibotsoft/micro/logger"
 	"github.com/aibotsoft/micro/sqlserver"
+	"time"
 
 	"github.com/aibotsoft/proxy-service/pkg/utils"
 	"github.com/aibotsoft/proxy-service/services/check"
@@ -44,7 +45,7 @@ func main() {
 	}()
 	// Init gProxy Client
 	//proxyClient := gproxy_client.NewClient(cfg, log)
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.ProxyService.GrpcTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	conn, err := grpc.DialContext(ctx, net.JoinHostPort("", strconv.Itoa(cfg.ProxyService.GrpcPort)), grpc.WithInsecure(), grpc.WithBlock())
 	logger.Panic(err, log, "grpc.DialContext error")

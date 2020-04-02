@@ -1,0 +1,1 @@
+drop view if exists proxy_stat_view

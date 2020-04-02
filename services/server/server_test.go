@@ -16,6 +16,15 @@ func init() {
 	utils.MustLoadDevEnv("../../.env")
 }
 
+func initServer(t *testing.T) *server.Server {
+	t.Helper()
+	log := logger.New()
+	cfg := config.New()
+	db := sqlserver.MustConnect(cfg)
+	s := server.NewServer(cfg, log, db)
+	return s
+}
+
 func TestNewServer(t *testing.T) {
 	var err error
 	cfg := config.New()
@@ -31,7 +40,6 @@ func TestNewServer(t *testing.T) {
 	assert.NoError(t, err)
 	srv.GracefulStop()
 }
-
 func TestServer_GetNextProxy(t *testing.T) {
 	log := logger.New()
 	cfg := config.New()
@@ -41,14 +49,6 @@ func TestServer_GetNextProxy(t *testing.T) {
 	if assert.NoError(t, err, err) {
 		assert.IsType(t, int64(0), got.GetProxyItem().GetProxyId())
 	}
-}
-func initServer(t *testing.T) *server.Server {
-	t.Helper()
-	log := logger.New()
-	cfg := config.New()
-	db := sqlserver.MustConnect(cfg)
-	s := server.NewServer(cfg, log, db)
-	return s
 }
 func TestServer_GetBestProxy(t *testing.T) {
 	s := initServer(t)
