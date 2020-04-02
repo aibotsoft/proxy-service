@@ -1,27 +1,33 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"github.com/aibotsoft/gproxy"
+	"github.com/aibotsoft/gen/proxypb"
 	"github.com/aibotsoft/micro/config"
 	"github.com/aibotsoft/micro/logger"
-	"github.com/aibotsoft/micro/postgres"
-	"github.com/aibotsoft/proxy-service/cmd/check"
-	"github.com/aibotsoft/proxy-service/cmd/collect"
-	"github.com/aibotsoft/proxy-service/internal/gproxy_client"
-	"github.com/subosito/gotenv"
+	"github.com/aibotsoft/micro/sqlserver"
+
+	"github.com/aibotsoft/proxy-service/pkg/utils"
+	"github.com/aibotsoft/proxy-service/services/check"
+	"github.com/aibotsoft/proxy-service/services/collect"
+	"github.com/aibotsoft/proxy-service/services/server"
+	"google.golang.org/grpc"
+	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 )
 
 func main() {
 	// Init dependencies
-	gotenv.Must(gotenv.Load)
+	utils.MustLoadDevEnv()
 	cfg := config.New()
 	log := logger.New().With("service", cfg.Service.Name)
 	log.Infow("Begin service", "config", cfg)
-	db := postgres.MustConnect(cfg)
+	//db := postgres.MustConnect(cfg)
+	db := sqlserver.MustConnect(cfg)
 	defer db.Close()
 
 	// Инициализируем GracefulStop
@@ -32,12 +38,17 @@ func main() {
 		errc <- fmt.Errorf("%s", <-c)
 	}()
 	// Run gPRC proxy server
-	s := gproxy.NewServer(cfg, log, db)
+	s := server.NewServer(cfg, log, db)
 	go func() {
 		errc <- s.Serve()
 	}()
 	// Init gProxy Client
-	proxyClient := gproxy_client.NewClient(cfg, log)
+	//proxyClient := gproxy_client.NewClient(cfg, log)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.ProxyService.GrpcTimeout)
+	defer cancel()
+	conn, err := grpc.DialContext(ctx, net.JoinHostPort("", strconv.Itoa(cfg.ProxyService.GrpcPort)), grpc.WithInsecure(), grpc.WithBlock())
+	logger.Panic(err, log, "grpc.DialContext error")
+	proxyClient := proxypb.NewProxyClient(conn)
 
 	// Run Collect Service
 	collectService := collect.New(cfg, log, proxyClient)
@@ -56,15 +67,5 @@ func main() {
 	}()
 
 	log.Info("exit: ", <-errc)
-	//msg, err := msg_server.NewMsgServer(cfg, log)
 	//err = migration.Up(db)
-	//log.Println("main : Started : Initializing API support")
-	//server := http.Server{
-	//	Addr:         cfg.Web.APIHost,
-	//	Handler:      handlers.API(),
-	//	ReadTimeout:  cfg.Web.ReadTimeout,
-	//	WriteTimeout: cfg.Web.WriteTimeout,
-	//}
-	//log.Fatal(server.ListenAndServe())
-
 }

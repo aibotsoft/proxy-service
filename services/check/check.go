@@ -2,7 +2,7 @@ package check
 
 import (
 	"context"
-	"github.com/aibotsoft/gproxy"
+	pb "github.com/aibotsoft/gen/proxypb"
 	"github.com/aibotsoft/micro/config"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
@@ -18,10 +18,10 @@ type Check struct {
 	cfg         *config.Config
 	log         *zap.SugaredLogger
 	cron        *cron.Cron
-	proxyClient gproxy.ProxyClient
+	proxyClient pb.ProxyClient
 }
 
-func New(cfg *config.Config, log *zap.SugaredLogger, proxyClient gproxy.ProxyClient) *Check {
+func New(cfg *config.Config, log *zap.SugaredLogger, proxyClient pb.ProxyClient) *Check {
 	return &Check{cfg: cfg, cron: cron.New(), log: log, proxyClient: proxyClient}
 }
 func (c *Check) Start() {
@@ -54,8 +54,8 @@ func (c *Check) CheckProxyJob() {
 	}
 }
 
-func (c *Check) getNextProxyItem(ctx context.Context) (*gproxy.ProxyItem, error) {
-	res, err := c.proxyClient.GetNextProxy(ctx, &gproxy.GetNextProxyRequest{})
+func (c *Check) getNextProxyItem(ctx context.Context) (*pb.ProxyItem, error) {
+	res, err := c.proxyClient.GetNextProxy(ctx, &pb.GetNextProxyRequest{})
 	switch {
 	case status.Convert(err).Code() == codes.NotFound:
 		c.log.Info(err)
@@ -66,10 +66,10 @@ func (c *Check) getNextProxyItem(ctx context.Context) (*gproxy.ProxyItem, error)
 	}
 	return res.GetProxyItem(), nil
 }
-func (c *Check) checkProxy(ctx context.Context, p *gproxy.ProxyItem) *gproxy.ProxyStat {
+func (c *Check) checkProxy(ctx context.Context, p *pb.ProxyItem) *pb.ProxyStat {
 	addr := net.JoinHostPort(p.ProxyIp, strconv.Itoa(int(p.ProxyPort)))
 	ConnTime, ConnStatus := c.checkAddr(ctx, addr)
-	stat := &gproxy.ProxyStat{
+	stat := &pb.ProxyStat{
 		ProxyId:    p.ProxyId,
 		ConnTime:   ConnTime.Milliseconds(),
 		ConnStatus: ConnStatus,
@@ -77,8 +77,8 @@ func (c *Check) checkProxy(ctx context.Context, p *gproxy.ProxyItem) *gproxy.Pro
 	return stat
 }
 
-func (c *Check) sendProxyStat(ctx context.Context, stat *gproxy.ProxyStat) (*gproxy.ProxyStat, error) {
-	res, err := c.proxyClient.CreateProxyStat(ctx, &gproxy.CreateProxyStatRequest{ProxyStat: stat})
+func (c *Check) sendProxyStat(ctx context.Context, stat *pb.ProxyStat) (*pb.ProxyStat, error) {
+	res, err := c.proxyClient.CreateProxyStat(ctx, &pb.CreateProxyStatRequest{ProxyStat: stat})
 	if err != nil {
 		return nil, errors.Wrap(err, "proxyClient.CreateProxyStat error")
 	}

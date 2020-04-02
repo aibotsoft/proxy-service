@@ -10,7 +10,7 @@ import (
 
 const (
 	versionTable = "public.schema_version"
-	pathFromRoot = "migrations"
+	pathFromRoot = "migrations_pg"
 )
 
 // Up migrate db all the way up

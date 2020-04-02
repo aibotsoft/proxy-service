@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/aibotsoft/gproxy"
 	"github.com/aibotsoft/micro/config"
+	"github.com/aibotsoft/micro/logger"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"strconv"
@@ -15,8 +16,6 @@ func NewClient(cfg *config.Config, log *zap.SugaredLogger) gproxy.ProxyClient {
 	defer cancel()
 	target := ":" + strconv.Itoa(cfg.ProxyService.GRPCPort)
 	conn, err := grpc.DialContext(ctx, target, grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		log.Panic("Error grpc.DialContext: ", err)
-	}
+	logger.Panic(err, log, "grpc.DialContext error")
 	return gproxy.NewProxyClient(conn)
 }

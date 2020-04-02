@@ -1,3 +1,4 @@
+#source .env
 .EXPORT_ALL_VARIABLES:
 SERVICE_NAME=proxy-service
 DOCKER_USERNAME=aibotsoft
@@ -42,3 +43,10 @@ kube_deploy:
 kube_rol:
 	kubectl -n micro rollout restart deployment $$SERVICE_NAME
 
+mig_up:
+	source .env
+	$$DSL=sqlserver://$$MSSQL_USER:$$MSSQL_PASSWORD@$$mssql_host:$$mssql_port?database=$$MSSQL_DATABASE
+	migrate -verbose -source file://migrations -database $$DSL goto 2
+
+import_env:
+	source .env

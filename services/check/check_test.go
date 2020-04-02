@@ -5,17 +5,10 @@ import (
 	"github.com/aibotsoft/micro/config"
 	"github.com/aibotsoft/micro/logger"
 	"github.com/stretchr/testify/assert"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"testing"
 	"time"
 )
 
-func Test_Status(t *testing.T) {
-	st := status.Convert(nil).Code()
-	assert.Equal(t, codes.OK, st)
-
-}
 func Test_CheckAddr(t *testing.T) {
 	cfg := config.New()
 	log := logger.New()
