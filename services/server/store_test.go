@@ -84,3 +84,11 @@ func TestStore_GetNextProxyItem(t *testing.T) {
 		assert.NotEmpty(t, get, get)
 	}
 }
+
+func TestStore_GetBestProxy(t *testing.T) {
+	store := initStore(t)
+	get, err := store.GetBestProxy(context.Background())
+	if assert.NoError(t, err) {
+		assert.NotEmpty(t, get, get)
+	}
+}

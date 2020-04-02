@@ -79,3 +79,10 @@ func (s *Server) GetNextProxy(ctx context.Context, req *pb.GetNextProxyRequest) 
 		return nil, status.Errorf(codes.Internal, "GetNextProxy error %v", err)
 	}
 }
+func (s *Server) GetBestProxy(ctx context.Context, req *pb.GetBestProxyRequest) (*pb.GetBestProxyResponse, error) {
+	proxyItem, err := s.store.GetBestProxy(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "store.GetBestProxy error: %v", err)
+	}
+	return &pb.GetBestProxyResponse{ProxyItem: proxyItem}, nil
+}

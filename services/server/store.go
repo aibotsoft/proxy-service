@@ -88,8 +88,8 @@ func (s *Store) GetNextProxyItem(ctx context.Context) (*pb.ProxyItem, error) {
 	switch err {
 	case nil:
 		return &proxyItem, nil
-	//case pgx.ErrNoRows:
-	//	return nil, ErrNoRows
+	case ErrNoRows:
+		return nil, ErrNoRows
 	default:
 		return nil, errors.Wrap(err, "Store: GetNextProxyItem error")
 	}
@@ -132,6 +132,20 @@ func (s *Store) GetNextProxyItemBatch(ctx context.Context, size int) error {
 		s.nextProxyQueue <- p
 	}
 	return nil
+}
+func (s *Store) GetBestProxy(ctx context.Context) (*pb.ProxyItem, error) {
+	p := &pb.ProxyItem{}
+	var avgTime, successRate, checkCount float64
+	err := s.db.QueryRowContext(ctx, "uspGetBestProxy",
+		sql.Named("returnCount", 1),
+		sql.Named("minSuccessRate", 0.3),
+		sql.Named("minCheckCount", 0),
+	).Scan(&p.ProxyId, &p.ProxyAddr, &avgTime, &successRate, &checkCount)
+	if err != nil {
+		return nil, errors.Wrap(err, "uspGetBestProxy error")
+	}
+	s.log.Debug(p, avgTime, successRate, checkCount)
+	return p, nil
 }
 
 //func (s *Store) GetNextProxyItem(p *ProxyItem) error {
