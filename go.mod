@@ -5,14 +5,14 @@ go 1.14
 require (
 	github.com/aibotsoft/gen/proxypb v0.0.0-20200403065041-efd2d27067c9
 	github.com/aibotsoft/gproxy v0.0.0-20200330154955-28733199c649
-	github.com/aibotsoft/micro v0.0.0-20200402091437-694735b9317e
+	github.com/aibotsoft/micro v0.0.0-20200403074803-75ca4377a55d
 	github.com/antchfx/htmlquery v1.2.2
 	github.com/antchfx/xpath v1.1.4 // indirect
 	github.com/dgraph-io/ristretto v0.0.2
 	github.com/go-resty/resty/v2 v2.2.0
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/jackc/pgx/v4 v4.6.0
-	github.com/jackc/tern v1.10.1
+	github.com/jackc/tern v1.10.2
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.5.1

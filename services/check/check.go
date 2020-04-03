@@ -25,12 +25,47 @@ func New(cfg *config.Config, log *zap.SugaredLogger, proxyClient pb.ProxyClient)
 }
 func (c *Check) Start() {
 	c.cron.Schedule(cron.Every(c.cfg.ProxyService.CheckPeriod), cron.FuncJob(c.CheckProxyJob))
+	c.cron.Schedule(cron.Every(c.cfg.ProxyService.DeleteBadProxyPeriod), cron.FuncJob(c.DeleteBadProxyJob))
+	c.cron.Schedule(cron.Every(c.cfg.ProxyService.DeleteOldStatPeriod), cron.FuncJob(c.DeleteOldStatJob))
 	c.cron.Start()
 }
 
 func (c *Check) Stop() context.Context {
 	ctx := c.cron.Stop()
 	return ctx
+}
+
+// Регулярно помечаем удаленными (deleted_at) прокси с очень плохой статистикой
+func (c *Check) DeleteOldStatJob() {
+	c.log.Debug("DeleteOldStatJob begins..")
+	ctx, cancel := context.WithTimeout(context.Background(), c.cfg.ProxyService.GrpcTimeout)
+	defer cancel()
+	res, err := c.proxyClient.DeleteOldStat(ctx, nil)
+	if err != nil {
+		c.log.Info(errors.Wrap(err, "proxyClient.DeleteOldStat error"))
+		return
+	}
+	for _, p := range res.GetDeletedStat() {
+		c.log.Infof("Deleted old stat %+v", p)
+	}
+	c.log.Debug("DeleteOldStatJob end ", res.GetDeletedStat())
+
+}
+
+// Регулярно помечаем удаленными (deleted_at) прокси с очень плохой статистикой
+func (c *Check) DeleteBadProxyJob() {
+	c.log.Info("DeleteBadProxyJob begins..")
+	ctx, cancel := context.WithTimeout(context.Background(), c.cfg.ProxyService.GrpcTimeout)
+	defer cancel()
+	res, err := c.proxyClient.DeleteBadProxy(ctx, nil)
+	if err != nil {
+		c.log.Info(errors.Wrap(err, "proxyClient.DeleteBadProxy error"))
+		return
+	}
+	for _, p := range res.GetBadProxy() {
+		c.log.Infof("Deleted a bad proxy %+v", p)
+	}
+	c.log.Debug("DeleteBadProxyJob end ", res.GetBadProxy())
 }
 
 // Основная работа по проверке прокси
