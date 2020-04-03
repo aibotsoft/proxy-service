@@ -95,5 +95,9 @@ func (s *Server) DeleteBadProxy(ctx context.Context, req *pb.DeleteBadProxyReque
 }
 
 func (s *Server) DeleteOldStat(ctx context.Context, req *pb.DeleteOldStatRequest) (*pb.DeleteOldStatResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteOldStat not implemented")
+	deletedList, err := s.store.DeleteOldStat(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "store.DeleteOldStat error: %v", err)
+	}
+	return &pb.DeleteOldStatResponse{DeletedStat: deletedList}, nil
 }

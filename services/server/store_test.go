@@ -95,8 +95,16 @@ func TestStore_GetBestProxy(t *testing.T) {
 
 func TestStore_DeleteBadProxy(t *testing.T) {
 	store := initStore(t)
-	get, err := store.DeleteBadProxy(context.Background())
+	got, err := store.DeleteBadProxy(context.Background())
 	if assert.NoError(t, err, err) {
-		assert.NotEmpty(t, get, get)
+		assert.IsType(t, make([]*pb.DeletedProxy, 0), got)
+	}
+}
+
+func TestStore_DeleteOldStat(t *testing.T) {
+	store := initStore(t)
+	got, err := store.DeleteOldStat(context.Background())
+	if assert.NoError(t, err, err) {
+		assert.IsType(t, make([]*pb.DeletedStat, 0), got)
 	}
 }

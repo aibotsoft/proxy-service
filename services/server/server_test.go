@@ -63,6 +63,15 @@ func TestServer_DeleteBadProxy(t *testing.T) {
 	s := initServer(t)
 	got, err := s.DeleteBadProxy(context.Background(), nil)
 	if assert.NoError(t, err, err) {
-		assert.IsType(t, make([]*pb.BadProxy, 0), got.GetBadProxy())
+		assert.IsType(t, make([]*pb.DeletedProxy, 0), got.GetBadProxy(), got)
 	}
+}
+
+func TestServer_DeleteOldStat(t *testing.T) {
+	s := initServer(t)
+	got, err := s.DeleteOldStat(context.Background(), nil)
+	if assert.NoError(t, err, err) {
+		assert.IsType(t, make([]*pb.DeletedStat, 0), got.GetDeletedStat(), got)
+	}
+
 }

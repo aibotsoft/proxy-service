@@ -60,12 +60,9 @@ with t as (
 select user_id, user_name, created_at, v, d
 from proxy_user,
      t
--- select * from t
-go
-
 
 
 
 select *
-from stat
-where proxy_id = 261
+from proxy
+where deleted_at is not null

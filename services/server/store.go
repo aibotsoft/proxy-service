@@ -148,8 +148,8 @@ func (s *Store) GetBestProxy(ctx context.Context) (*pb.ProxyItem, error) {
 	return p, nil
 }
 
-func (s *Store) DeleteBadProxy(ctx context.Context) ([]*pb.BadProxy, error) {
-	var badProxyList []*pb.BadProxy
+func (s *Store) DeleteBadProxy(ctx context.Context) ([]*pb.DeletedProxy, error) {
+	var deletedList []*pb.DeletedProxy
 
 	rows, err := s.db.QueryContext(ctx, "uspDeleteBadProxy",
 		sql.Named("minSuccessRate", 0.1),
@@ -159,15 +159,36 @@ func (s *Store) DeleteBadProxy(ctx context.Context) ([]*pb.BadProxy, error) {
 		return nil, errors.Wrap(err, "uspDeleteBadProxy error")
 	}
 	for rows.Next() {
-		p := &pb.BadProxy{}
+		p := &pb.DeletedProxy{}
 		err := rows.Scan(&p.ProxyId, &p.DeletedAt)
 		if err != nil {
 			s.log.Info("uspDeleteBadProxy Scan error ", err)
 			continue
 		}
-		badProxyList = append(badProxyList, p)
+		deletedList = append(deletedList, p)
 	}
-	return badProxyList, nil
+	return deletedList, nil
+}
+
+func (s *Store) DeleteOldStat(ctx context.Context) ([]*pb.DeletedStat, error) {
+	var deletedList []*pb.DeletedStat
+
+	rows, err := s.db.QueryContext(ctx, "uspDeleteOldStat",
+		sql.Named("minCheckCount", 20),
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "uspDeleteOldStat error")
+	}
+	for rows.Next() {
+		p := &pb.DeletedStat{}
+		err := rows.Scan(&p.ProxyId, &p.DeletedAt)
+		if err != nil {
+			s.log.Info("uspDeleteOldStat Scan error ", err)
+			continue
+		}
+		deletedList = append(deletedList, p)
+	}
+	return deletedList, nil
 }
 
 //func (s *Store) GetNextProxyItem(p *ProxyItem) error {
